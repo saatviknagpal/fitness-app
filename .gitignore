@@ -1,0 +1,62 @@
+# ===== Java / Spring Boot =====
+/**/target/
+/**/build/
+/**/out/
+/*.jar
+/*.war
+
+# Maven & Gradle wrappers/files
+/.mvn/
+/.gradle/
+/.gradle/
+/build/
+
+# Spring Boot specifics
+/.springBeans
+
+# ===== Next.js / Node.js =====
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/dist/
+/frontend/build/
+/frontend/.env*
+/frontend/.vercel/
+/frontend/coverage/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# ===== Docker =====
+docker-compose.override.yml
+docker-compose.*.yml
+*.env
+.Dockerfile.swp
+
+# ===== IDEs =====
+# IntelliJ IDEA
+*.iml
+*.iws
+*.ipr
+.idea/
+/out/
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+/.apt_generated
+
+# VS Code
+.vscode/
+
+# ===== OS (macOS/Windows/Linux) =====
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===== Other =====
+*.pem
