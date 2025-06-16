@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: activityservice
+  data:
+    mongodb:
+      uri: mongodb+srv://admin-saatvik:saatvik@cluster0.1s8fn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/fitness-activity
+      database: fitness-activity
+
+server:
+  port: 8082
