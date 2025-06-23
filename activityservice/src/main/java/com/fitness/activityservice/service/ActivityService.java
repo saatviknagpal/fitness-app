@@ -5,15 +5,37 @@ import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
 import com.fitness.activityservice.model.Activity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
+    private final UserValidationService userValidationService;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing.key}")
+    private String routingKey;
+
+
 
     public ActivityResponse trackActivity(ActivityRequest activityRequest) {
+
+        // Validate user existence
+        boolean isValidUser = userValidationService.validateUser(activityRequest.getUserId());
+        if(!isValidUser) {
+            throw new RuntimeException("Invalid user ID: " + activityRequest.getUserId());
+        }
+        // Create and save the activity
         Activity activity = Activity.builder().userId(activityRequest.getUserId())
                 .type(activityRequest.getType())
                 .duration(activityRequest.getDuration())
@@ -23,6 +45,14 @@ public class ActivityService {
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
+
+        //Publish to RabbitMQ for AI Processing (e.g., generating insights)
+        try{
+            rabbitTemplate.convertAndSend(exchange, routingKey, savedActivity);
+        } catch (Exception e) {
+            System.err.println("Failed to send message to RabbitMQ: " + e.getMessage());
+        }
+
         return convertToResponse(savedActivity);
 
     }
@@ -39,5 +69,18 @@ public class ActivityService {
         response.setCreatedAt(activity.getCreatedAt());
         response.setUpdatedAt(activity.getUpdatedAt());
         return response;
+    }
+
+    public List<ActivityResponse> getActivity(String userId) {
+        List<Activity> activities = activityRepository.findByUserId(userId);
+        return activities.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public ActivityResponse getActivityById(String activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new RuntimeException("Activity not found with id: " + activityId));
+        return convertToResponse(activity);
     }
 }
